@@ -1,0 +1,78 @@
+name: 확전 번역봇
+
+on:
+  schedule:
+    # 원문 봇이 08:01 UTC 즈음 올린다. GitHub cron 은 5~15분 늦을 수 있어
+    # 두 번 노려보고, 놓쳤을 때를 대비해 한 번 더 확인한다.
+    # 이미 올린 날짜는 봇이 스스로 건너뛰므로 중복 전송은 없다.
+    - cron: "10,40 8 * * *"
+    - cron: "30 9 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "전송하지 않고 확인만"
+        type: boolean
+        default: false
+      force:
+        description: "이미 올린 날짜여도 다시 전송"
+        type: boolean
+        default: false
+
+concurrency:
+  group: escalation
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: 카탈로그 생성
+        run: python build_catalog.py
+
+      - name: 확전 확인 및 전송
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          SOURCE_BOT_NAME: ${{ vars.SOURCE_BOT_NAME }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
+          python bot.py $ARGS
+
+      - name: 만든 이미지 보관
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: escalation-png
+          path: out/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: 사전 자동 보강분 커밋
+        if: success()
+        run: |
+          if git diff --quiet -- data/overrides.json; then
+            echo "사전 변경 없음"
+            exit 0
+          fi
+          git config user.name "escalation-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/overrides.json
+          git commit -m "사전 자동 보강 [skip ci]"
+          git push

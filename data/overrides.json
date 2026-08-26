@@ -1,0 +1,72 @@
+{
+  "_note": "인게임 스크린샷으로 확인한 수정·추가분. translation_table.json(v12 유산)은 건드리지 않고 여기서 덮어쓴다.",
+  "missions": {
+    "Wall Street": "월스트리트"
+  },
+  "items": {
+    "Golan Gear Ltd": "골란 기어 유한회사",
+    "Edelweiss GPz": "에델바이스 GPz",
+    "Ortiz: Exuro": "오티즈: 엑수로",
+    "Ortiz: Reficere": "오티즈: 레피세레",
+    "Gear Mods": "보호장구 시스템 개조",
+    "Skill Mods": "스킬 부속품",
+    "Shiny Monkey Gear": "샤이니 멍키 보호장구",
+    "Holster": "권총집",
+    "Backpack": "배낭",
+    "Mask": "마스크",
+    "Glove": "장갑",
+    "Knee Pad": "무릎 보호대",
+    "5.11 Tactical": "5.11 택티컬",
+    "Belstone Armory": "벨스톤 무기고",
+    "Brazos de Arcabuz": "브라조스 데 아르카부스",
+    "Uzina Getica": "우지나 게티카",
+    "Yaahl Gear": "얄 기어",
+    "Weapon Cache": "프로토타입 무기 상자",
+    "Gear Cache": "프로토타입 장비 상자",
+    "Body Armor": "방탄복",
+    "Chest Pieces": "방탄복"
+  },
+  "item_categories": {
+    "Golan Gear Ltd": "Brand Set",
+    "Edelweiss GPz": "Brand Set",
+    "Ortiz: Exuro": "Gear Set",
+    "Ortiz: Reficere": "Gear Set",
+    "True Patriot": "Gear Set",
+    "Shiny Monkey Gear": "Brand Set",
+    "5.11 Tactical": "Brand Set",
+    "Belstone Armory": "Brand Set",
+    "Brazos de Arcabuz": "Brand Set",
+    "Uzina Getica": "Brand Set",
+    "Yaahl Gear": "Brand Set",
+    "Holster": "Gear",
+    "Backpack": "Gear",
+    "Mask": "Gear",
+    "Glove": "Gear",
+    "Knee Pad": "Gear",
+    "Prototype Gear Cache": "Cache",
+    "Prototype Weapon Cache": "Cache",
+    "Weapon Cache": "Cache",
+    "Gear Cache": "Cache",
+    "Body Armor": "Gear",
+    "Chest Pieces": "Gear"
+  },
+  "needs_review": [
+    "Belstone Armory",
+    "Brazos de Arcabuz",
+    "Uzina Getica",
+    "Yaahl Gear",
+    "5.11 Tactical"
+  ],
+  "allow_no_icon": [
+    "Prototype Gear Cache",
+    "Prototype Weapon Cache",
+    "Arsenal",
+    "Vanguard",
+    "Weapon Mods",
+    "Weapon Cache",
+    "Gear Cache"
+  ],
+  "drop_items": [
+    "Weapon Mods"
+  ]
+}
