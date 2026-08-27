@@ -64,15 +64,24 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: 사전 자동 보강분 커밋
-        if: success()
+      - name: 사전 보강분과 스케줄 유지 흔적 커밋
+        if: always()
         run: |
-          if git diff --quiet -- data/overrides.json; then
-            echo "사전 변경 없음"
+          # GitHub은 저장소에 60일간 변화가 없으면 예약 실행을 꺼버린다.
+          # 사전이 거의 다 차서 자동 보강 커밋이 잘 안 생기므로,
+          # 달이 바뀔 때 흔적을 하나 남겨 그 일이 없게 한다. 한 달에 한 번뿐이다.
+          STAMP=$(date -u +%Y-%m)
+          if [ "$(cat data/heartbeat.txt 2>/dev/null)" != "$STAMP" ]; then
+            echo "$STAMP" > data/heartbeat.txt
+            echo "스케줄 유지 흔적 갱신: $STAMP"
+          fi
+          git add data/overrides.json data/heartbeat.txt
+          if git diff --staged --quiet; then
+            echo "커밋할 변경 없음"
             exit 0
           fi
           git config user.name "escalation-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/overrides.json
-          git commit -m "사전 자동 보강 [skip ci]"
+          git commit -m "사전 보강 · 스케줄 유지 [skip ci]"
+          git pull --rebase --autostash origin main
           git push
