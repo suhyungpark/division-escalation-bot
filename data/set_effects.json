@@ -5,7 +5,8 @@
     "2026-08-13 패치노트에 장비 성능 변경 예고가 있음. 확정되면 수치 전면 재검증 필요.",
     "tiers 배열의 n은 부위 수. 인게임 표기는 'n+ 개'.",
     "talent = 4+ 개 고유 특성 이름. paragraphs = 인게임 원문 문단(줄바꿈 단위).",
-    "2026-08-26: 페트로프 값이 다른 세트 내용으로 오염돼 있어 바로잡음. 이후 나무위키 추출은 인게임 확인된 항목(길라 가드·코어 근력·오티즈 엑수로)을 대조군으로 함께 뽑아 맞는지 확인한 뒤에만 반영할 것."
+    "2026-08-26: 페트로프 값이 다른 세트 내용으로 오염돼 있어 바로잡음. 이후 나무위키 추출은 인게임 확인된 항목(길라 가드·코어 근력·오티즈 엑수로)을 대조군으로 함께 뽑아 맞는지 확인한 뒤에만 반영할 것.",
+    "2026-08-27 Red Horizon 패치 반영. 세트 보너스는 PvE 수치 기준."
   ],
   "gear_sets": {
     "Tip of the Spear": {
@@ -257,11 +258,11 @@
     },
     "True Patriot": {
       "ko": "진정한 애국자",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 2,
-          "text": "+30.0% 탄약 휴대량"
+          "text": "+15.0% 무기 조작력"
         },
         {
           "n": 3,
@@ -404,15 +405,15 @@
     },
     "Aces & Eights": {
       "ko": "에이스 & 에이트",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 2,
-          "text": "+15.0% 지정사수소총 대미지 · +15.0% 소총 대미지"
+          "text": "+30.0% 지정사수소총 대미지 · +30.0% 소총 대미지"
         },
         {
           "n": 3,
-          "text": "+30.0% 헤드샷 대미지"
+          "text": "+30.0% 헤드샷 대미지 · +30.0% 무기 조작력"
         },
         {
           "n": 4,
@@ -510,15 +511,15 @@
     },
     "Breaking Point": {
       "ko": "한계점",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 2,
-          "text": "+25.0% 소총 대미지 · +25.0% 지정사수소총 대미지"
+          "text": "+30.0% 소총 대미지 · +30.0% 지정사수소총 대미지"
         },
         {
           "n": 3,
-          "text": "+30.0% 헤드샷 대미지 · +15.0% 무기 조작력"
+          "text": "+30.0% 헤드샷 대미지 · +30.0% 무기 조작력"
         },
         {
           "n": 4,
@@ -531,15 +532,15 @@
     },
     "Hotshot": {
       "ko": "핫샷",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 2,
-          "text": "+30.0% 지정사수소총 대미지 · +30.0% 무기 조작력"
+          "text": "+30.0% 지정사수소총 대미지"
         },
         {
           "n": 3,
-          "text": "+30.0% 헤드샷 대미지"
+          "text": "+30.0% 헤드샷 대미지 · +30.0% 무기 조작력"
         },
         {
           "n": 4,
@@ -572,12 +573,26 @@
           ]
         }
       ]
+    },
+    "Ember Engine": {
+      "ko": "Ember Engine",
+      "source": "patch-pve",
+      "tiers": [
+        {
+          "n": 2,
+          "text": "+8.0% 스킬 효율"
+        },
+        {
+          "n": 3,
+          "text": "+30.0% 상태이상 효과"
+        }
+      ]
     }
   },
   "brand_sets": {
     "Murakami Industries": {
       "ko": "무라카미 산업",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 1,
@@ -615,11 +630,11 @@
     },
     "Golan Gear Ltd": {
       "ko": "골란 기어 유한회사",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 상태이상 효과"
+          "text": "+20.0% 폭발물 저항"
         },
         {
           "n": 2,
@@ -627,18 +642,18 @@
         },
         {
           "n": 3,
-          "text": "+10.0% 전체 방어도"
+          "text": "+150.0% 위협 수준 증가"
         }
       ],
       "core_attribute": "방어도"
     },
     "Petrov Defense Group": {
       "ko": "페트로프 방위 그룹",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 경기관총 대미지"
+          "text": "+12.0% 경기관총 대미지"
         },
         {
           "n": 2,
@@ -653,7 +668,7 @@
     },
     "Habsburg Guard": {
       "ko": "합스부르크 가드",
-      "source": "namu",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 1,
@@ -661,7 +676,7 @@
         },
         {
           "n": 2,
-          "text": "+20.0% 지정사수소총 대미지"
+          "text": "+24.0% 지정사수소총 대미지"
         },
         {
           "n": 3,
@@ -672,7 +687,7 @@
     },
     "Edelweiss GPz": {
       "ko": "에델바이스 GPz",
-      "source": "ingame",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -691,7 +706,7 @@
     },
     "Providence Defense": {
       "ko": "프로비던스 방위산업",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
@@ -710,12 +725,12 @@
     },
     "Sokolov Concern": {
       "ko": "소콜로프 상사",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 기관단총 대미지"
+          "text": "+12.0% 기관단총 대미지"
         },
         {
           "n": 2,
@@ -729,16 +744,16 @@
     },
     "Airaldi Holdings": {
       "ko": "아이랄디 홀딩",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 지정사수소총 대미지"
+          "text": "+12.0% 지정사수소총 대미지"
         },
         {
           "n": 2,
-          "text": "+13.0% 헤드샷 대미지"
+          "text": "+26.0% 헤드샷 대미지"
         },
         {
           "n": 3,
@@ -748,7 +763,7 @@
     },
     "Alps Summit Armaments": {
       "ko": "알프스 정상 군수산업",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -767,26 +782,26 @@
     },
     "Badger Tuff": {
       "ko": "배저 터프",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 산탄총 대미지"
+          "text": "+12.0% 산탄총 대미지"
         },
         {
           "n": 2,
-          "text": "+5.0% 전체 방어도"
+          "text": "+10.0% 적 처치 시 방어도 회복"
         },
         {
           "n": 3,
-          "text": "+15.0% 적 처치 시 방어도 회복"
+          "text": "+15.0% 전체 방어도"
         }
       ]
     },
     "China Light Industries": {
       "ko": "차이나 경공업",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -795,26 +810,26 @@
         },
         {
           "n": 2,
-          "text": "+20.0% 스킬 가속"
+          "text": "+20.0% 상태이상 효과"
         },
         {
           "n": 3,
-          "text": "+25.0% 상태이상 효과"
+          "text": "+30.0% 스킬 가속"
         }
       ]
     },
     "Fenris Group AB": {
       "ko": "펜리르 그룹 AB",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 돌격소총 대미지"
+          "text": "+12.0% 돌격소총 대미지"
         },
         {
           "n": 2,
-          "text": "+30.0% 재장전 속도"
+          "text": "+32.0% 탄창 용량"
         },
         {
           "n": 3,
@@ -824,12 +839,12 @@
     },
     "Walker, Harris & Co": {
       "ko": "워커 해리스",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+5.0% 무기 대미지"
+          "text": "+6.0% 무기 대미지"
         },
         {
           "n": 2,
@@ -843,7 +858,7 @@
     },
     "Grupo Sombra S.A.": {
       "ko": "그루포 솜브라 주식회사",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
@@ -856,41 +871,41 @@
         },
         {
           "n": 3,
-          "text": "+13.0% 헤드샷 대미지"
+          "text": "+39.0% 헤드샷 대미지"
         }
       ]
     },
     "Richter & Kaiser GmbH": {
       "ko": "리히터 & 카이저 유한회사",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
           "n": 1,
-          "text": "+15.0% 받는 치유 효과"
+          "text": "+10.0% 스킬 가속"
         },
         {
           "n": 2,
-          "text": "+25.0% 폭발물 저항"
+          "text": "+40.0% 폭발물 저항"
         },
         {
           "n": 3,
-          "text": "+40.0% 스킬 회복"
+          "text": "+52.0% 스킬 회복"
         }
       ]
     },
     "Douglas & Harding": {
       "ko": "더글라스 & 하딩",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+20.0% 권총 대미지"
+          "text": "+24.0% 권총 대미지"
         },
         {
           "n": 2,
-          "text": "+30.0% 안정성"
+          "text": "+20.0% 스킬 생명력"
         },
         {
           "n": 3,
@@ -900,26 +915,26 @@
     },
     "Legatus S.p.A.": {
       "ko": "레가투스 S.p.A.",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+30.0% 교체 속도"
+          "text": "+15.0% 탄창 용량"
         },
         {
           "n": 2,
-          "text": "+70.0% 적정 사거리"
+          "text": "+24.0% 기관단총 대미지"
         },
         {
           "n": 3,
-          "text": "+15.0% 무기 대미지"
+          "text": "+105.0% 적정 사거리"
         }
       ]
     },
     "Empress International": {
       "ko": "엠프리스 인터내셔널",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -928,7 +943,7 @@
         },
         {
           "n": 2,
-          "text": "+10.0% 스킬 대미지"
+          "text": "+13.0% 스킬 대미지"
         },
         {
           "n": 3,
@@ -938,12 +953,12 @@
     },
     "Overlord Armaments": {
       "ko": "오버로드 군수산업",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 소총 대미지"
+          "text": "+12.0% 소총 대미지"
         },
         {
           "n": 2,
@@ -957,7 +972,7 @@
     },
     "Hana-U Corporation": {
       "ko": "하나-U 기업",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -966,17 +981,17 @@
         },
         {
           "n": 2,
-          "text": "+10.0% 스킬 대미지"
+          "text": "+13.0% 스킬 대미지"
         },
         {
           "n": 3,
-          "text": "+15.0% 무기 대미지"
+          "text": "+18.0% 무기 대미지"
         }
       ]
     },
     "Wyvern Wear": {
       "ko": "와이번 웨어",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -985,7 +1000,7 @@
         },
         {
           "n": 2,
-          "text": "+18.0% 상태이상 효과"
+          "text": "+20.0% 상태이상 효과"
         },
         {
           "n": 3,
@@ -995,7 +1010,7 @@
     },
     "Zwiadowka Sp. z o.o": {
       "ko": "즈비아도프카 Sp. z o.o.",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
@@ -1004,7 +1019,7 @@
         },
         {
           "n": 2,
-          "text": "+20.0% 소총 대미지"
+          "text": "+24.0% 소총 대미지"
         },
         {
           "n": 3,
@@ -1033,39 +1048,39 @@
     },
     "Lengmo": {
       "ko": "렝모",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
           "n": 1,
-          "text": "+20.0% 폭발물 저항"
+          "text": "+15.0% 재장전 속도"
         },
         {
           "n": 2,
-          "text": "+20.0% 스킬 생명력"
+          "text": "+24.0% 경기관총 대미지"
         },
         {
           "n": 3,
-          "text": "+30.0% 경기관총 대미지"
+          "text": "+30.0% 무기 조작력"
         }
       ]
     },
     "Imminence Armaments": {
       "ko": "이미넌스 군수산업",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+5.0% 무기 대미지"
+          "text": "+6.0% 무기 대미지"
         },
         {
           "n": 2,
-          "text": "+100.0% 위협 수준 증가"
+          "text": "+48.0% 권총 대미지"
         },
         {
           "n": 3,
-          "text": "+60.0% 권총 대미지"
+          "text": "+30.0% 스킬 생명력"
         }
       ]
     },
@@ -1147,7 +1162,7 @@
     },
     "Brazos de Arcabuz": {
       "ko": "브라조스 데 아르카부스",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
@@ -1166,7 +1181,7 @@
     },
     "Shiny Monkey Gear": {
       "ko": "샤이니 멍키 보호장구",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -1204,20 +1219,20 @@
     },
     "Urban Lookout": {
       "ko": "도시 감시병",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
           "n": 1,
-          "text": "+10.0% 명중률"
+          "text": "+5.0% 무기 조작력"
         },
         {
           "n": 2,
-          "text": "+30.0% 스킬 지속 시간"
+          "text": "+24.0% 지정사수소총 대미지"
         },
         {
           "n": 3,
-          "text": "+30.0% 지정사수소총 대미지"
+          "text": "+45.0% 스킬 지속 시간"
         }
       ]
     },
@@ -1242,15 +1257,39 @@
     },
     "Unit Alloys": {
       "ko": "유닛 합금",
-      "source": "MISSING",
-      "_todo": "나무위키 보호장구 문서에 아직 없음. 인게임 캡처 필요.",
-      "tiers": []
+      "source": "patch-pve",
+      "tiers": [
+        {
+          "n": 1,
+          "text": "+5.0% 발사 속도"
+        },
+        {
+          "n": 2,
+          "text": "+24.0% 돌격소총 대미지"
+        },
+        {
+          "n": 3,
+          "text": "+50.0% 탄창 용량"
+        }
+      ]
     },
     "Royal Works": {
       "ko": "로열 워크스",
-      "source": "MISSING",
-      "_todo": "나무위키 보호장구 문서에 아직 없음. 인게임 캡처 필요.",
-      "tiers": []
+      "source": "patch-pve",
+      "tiers": [
+        {
+          "n": 1,
+          "text": "+5.0% 무기 조작력"
+        },
+        {
+          "n": 2,
+          "text": "+24.0% 경기관총 대미지"
+        },
+        {
+          "n": 3,
+          "text": "+50.0% 명중률"
+        }
+      ]
     }
   }
 }
