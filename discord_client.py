@@ -72,14 +72,14 @@ class Discord:
         want = bot_name.lower()
         return want in name or want in globl
 
-    def find_source(self, bot_name, limit=30):
+    def find_source(self, bot_name, limit=50):
         """대상 봇이 올린 가장 최근 글을 돌려준다. 없으면 None."""
         for msg in self.recent(limit):
             if self.is_from(msg, bot_name):
                 return msg
         return None
 
-    def already_posted(self, marker, limit=30, my_id=None):
+    def already_posted(self, marker, limit=100, my_id=None):
         """내가 이미 이 날짜로 올렸는지 확인한다.
 
         첨부 파일 이름에 날짜를 박아두고 그것을 표식으로 쓴다.
