@@ -23,10 +23,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: escalation
-  cancel-in-progress: false
-
 jobs:
   post:
     runs-on: ubuntu-latest
