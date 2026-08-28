@@ -20,6 +20,7 @@
 """
 import argparse
 import datetime as _dt
+import hashlib
 import io
 import os
 import re
@@ -40,6 +41,22 @@ def log(msg):
 def channel_ids(explicit=None):
     raw = explicit or os.environ.get("DISCORD_CHANNEL_ID") or ""
     return [c for c in re.split(r"[,\s]+", raw.strip()) if c]
+
+
+def content_key(parsed):
+    """같은 날짜라도 내용이 바뀌면 달라지는 표식.
+
+    원문 봇이 하루치를 정정해서 다시 올리는 일이 있다. 날짜만 보고
+    중복을 판단하면 그 정정본을 영영 못 내보낸다. 파싱된 항목만으로
+    해시를 만들어서, 이모지나 서식이 바뀐 정도로는 흔들리지 않게 한다.
+    """
+    parts = [parsed["date"]]
+    for r in parsed["missions"]:
+        parts.append("%s>%s" % (r["mission_en"], r["loot_en"]))
+    for r in parsed.get("vendor", []):
+        parts.append("%s>%s" % (r["type_en"], r["loot_en"]))
+    raw = "|".join(parts).lower().replace(" ", "")
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:6]
 
 
 def render_png(data):
@@ -92,11 +109,12 @@ def run_one_channel(cid, pipe, source_name, dry_run, force):
         return 4
 
     date = parsed["date"]
-    log("  [감지] %s / 임무 %d개 / 벤더 %d개"
-        % (date, len(parsed["missions"]), len(parsed["vendor"])))
+    marker = "%s_%s" % (date, content_key(parsed))
+    log("  [감지] %s / 임무 %d개 / 벤더 %d개 / 내용 %s"
+        % (date, len(parsed["missions"]), len(parsed["vendor"]), marker[-6:]))
 
-    if not force and api.already_posted(date):
-        log("  [건너뜀] %s 는 이미 올렸습니다" % date)
+    if not force and api.already_posted(marker):
+        log("  [건너뜀] 같은 내용을 이미 올렸습니다 (%s)" % marker)
         return 0
 
     posted_at = msg.get("timestamp")
@@ -105,7 +123,7 @@ def run_one_channel(cid, pipe, source_name, dry_run, force):
     data, notices = pipe.build(parsed, when)
 
     img, buf = render_png(data)
-    save_local(img, date, "_" + cid[-4:])
+    save_local(img, marker, "_" + cid[-4:])
     for n in notices:
         log("  [알림] " + n)
 
@@ -113,7 +131,7 @@ def run_one_channel(cid, pipe, source_name, dry_run, force):
         log("  [건너뜀] --dry-run 이라 전송하지 않습니다")
         return 0
 
-    api.post_image(buf.getvalue(), "escalation_%s.png" % date)
+    api.post_image(buf.getvalue(), "escalation_%s.png" % marker)
     log("  [전송] 완료")
     return 0
 
