@@ -2,12 +2,11 @@ name: 확전 번역봇
 
 on:
   schedule:
-    # 원문 봇은 3개월 116건 중 68%가 08시(UTC)에 올라왔고 15시까지 흩어진다.
-    # 정각은 GitHub 부하가 몰리는 시간이라 피한다. 시간당 두 번 확인해서
-    # 한 번 놓쳐도 30분 뒤에 따라잡는다. 이미 올린 내용은 봇이 건너뛴다.
-    - cron: "7,27,47 8 * * *"
-    - cron: "13,43 9-16 * * *"
-    - cron: "17 1,3 * * *"
+    # GitHub 예약 실행은 지정한 시각을 지키지 않는다. 실측(8/28~8/29)으로
+    # 00:08 · 21:21 · 07:53 UTC 에 돌았는데 어느 것도 지정한 슬롯이 아니었다.
+    # 그래서 시각을 맞추려 애쓰는 대신, 깨어난 뒤 새 글이 올 때까지
+    # 자리를 지키게 한다. 몇 시에 깨어나든 그날 것을 잡는다.
+    - cron: "11 */3 * * *"
 
   workflow_dispatch:
     inputs:
@@ -23,6 +22,7 @@ on:
 jobs:
   post:
     runs-on: ubuntu-latest
+    timeout-minutes: 345
     permissions:
       contents: write
     defaults:
@@ -42,14 +42,15 @@ jobs:
         run: python build_catalog.py
 
       - name: 확전 확인 및 전송
+        timeout-minutes: 330
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
           SOURCE_BOT_NAME: ${{ vars.SOURCE_BOT_NAME }}
         run: |
-          ARGS=""
-          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          ARGS="--watch 300 --interval 300"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="--dry-run"; fi
           if [ "${{ inputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
           python bot.py $ARGS
 

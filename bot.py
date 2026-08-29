@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """확전 번역봇 v13 — 진입점.
 
-한 번 깨어나서 할 일만 하고 끝낸다. 상주하지 않는다.
-
-  python bot.py                    채널을 보고 새 글이 있으면 올린다
-  python bot.py --dry-run          채널은 읽되 올리지는 않는다
-  python bot.py --file msg.txt     파일을 읽어서 그림만 만든다 (오프라인)
-  python bot.py --force            이미 올린 날짜여도 다시 올린다
+  python bot.py                    한 번 확인하고 끝낸다
+  python bot.py --watch 240        새 글이 올 때까지 최대 240분 지켜본다
+  python bot.py --dry-run          읽되 전송하지 않는다
+  python bot.py --file msg.txt     파일로 그림만 만든다 (오프라인)
+  python bot.py --force            같은 내용이어도 다시 보낸다
   python bot.py --channel 123,456  환경변수 대신 채널을 직접 지정
 
 환경변수
@@ -15,8 +14,10 @@
   SOURCE_BOT_NAME      원문 봇 이름                    (기본: Daily Escalation Target Loot)
   DEEPL_API_KEY        사전에 없을 때만 쓰는 키          (선택)
 
-채널마다 원문 글도 따로, 중복 확인도 따로 한다. 서버가 달라도 상관없다.
-한 채널이 실패해도 나머지는 계속 처리한다.
+GitHub 예약 실행은 지정한 시각을 지키지 않는다. 실측해 보니 하루 한두 번,
+슬롯과 무관한 시각에 돌았다. 그래서 "깨어난 김에 끝내는" 방식으로는 원문
+게시 시각을 맞출 수가 없다. --watch 를 주면 깨어난 뒤 새 글이 올 때까지
+자리를 지키므로, 언제 깨어나든 그날 것을 잡는다.
 """
 import argparse
 import datetime as _dt
@@ -25,6 +26,7 @@ import io
 import os
 import re
 import sys
+import time
 
 import config as cfg
 import parser as msg_parser
@@ -36,6 +38,10 @@ DEFAULT_SOURCE = "Daily Escalation Target Loot"
 
 def log(msg):
     print(msg, flush=True)
+
+
+def stamp():
+    return _dt.datetime.now(_dt.timezone.utc).strftime("%H:%M")
 
 
 def channel_ids(explicit=None):
@@ -67,9 +73,9 @@ def render_png(data):
     return img, buf
 
 
-def save_local(img, date, suffix=""):
+def save_local(name, img, suffix=""):
     cfg.OUT.mkdir(parents=True, exist_ok=True)
-    path = cfg.OUT / ("escalation_%s%s.png" % (date, suffix))
+    path = cfg.OUT / ("escalation_%s%s.png" % (name, suffix))
     img.save(path)
     return path
 
@@ -83,39 +89,40 @@ def run_offline(path):
     when = _dt.datetime.now(_dt.timezone.utc)
     data, notices = pl.Pipeline().build(parsed, when)
     img, _ = render_png(data)
-    out = save_local(img, data["date"])
+    out = save_local(data["date"], img)
     log("[완료] %s  (%d x %d)" % (out, img.size[0], img.size[1]))
     for n in notices:
         log("  · " + n)
     return 0
 
 
-def run_one_channel(cid, pipe, source_name, dry_run, force):
-    """채널 하나를 처리한다. 0이면 정상(전송했거나 건너뛰었거나)."""
+def run_one_channel(cid, pipe, source_name, dry_run, force, quiet=False):
+    """채널 하나 처리. (종료코드, 전송했는지) 를 돌려준다."""
     import discord_client as dc
 
     api = dc.Discord(channel_id=cid)
-    info = api._get("/channels/%s" % cid)
-    log("[채널] #%s (%s)" % (info.get("name"), cid))
+    name = api._get("/channels/%s" % cid).get("name")
 
     msg = api.find_source(source_name)
     if not msg:
-        log("  [중단] 최근 글에서 원문 봇의 메시지를 찾지 못했습니다")
-        return 3
+        if not quiet:
+            log("  [#%s] 원문 봇의 메시지를 찾지 못했습니다" % name)
+        return 3, False
 
     parsed = msg_parser.parse(api.message_text(msg))
     if not parsed:
-        log("  [중단] 찾은 메시지가 확전 형식이 아닙니다")
-        return 4
+        if not quiet:
+            log("  [#%s] 확전 형식이 아닙니다" % name)
+        return 4, False
 
-    date = parsed["date"]
-    marker = "%s_%s" % (date, content_key(parsed))
-    log("  [감지] %s / 임무 %d개 / 벤더 %d개 / 내용 %s"
-        % (date, len(parsed["missions"]), len(parsed["vendor"]), marker[-6:]))
-
+    marker = "%s_%s" % (parsed["date"], content_key(parsed))
     if not force and api.already_posted(marker):
-        log("  [건너뜀] 같은 내용을 이미 올렸습니다 (%s)" % marker)
-        return 0
+        if not quiet:
+            log("  [#%s] %s — 이미 올린 내용" % (name, marker))
+        return 0, False
+
+    log("  [#%s] %s / 임무 %d개 / 벤더 %d개 — 새 내용"
+        % (name, marker, len(parsed["missions"]), len(parsed["vendor"])))
 
     posted_at = msg.get("timestamp")
     when = (_dt.datetime.fromisoformat(posted_at) if posted_at
@@ -123,38 +130,65 @@ def run_one_channel(cid, pipe, source_name, dry_run, force):
     data, notices = pipe.build(parsed, when)
 
     img, buf = render_png(data)
-    save_local(img, marker, "_" + cid[-4:])
+    save_local(marker, img, "_" + cid[-4:])
     for n in notices:
-        log("  [알림] " + n)
+        log("    [알림] " + n)
 
     if dry_run:
-        log("  [건너뜀] --dry-run 이라 전송하지 않습니다")
-        return 0
+        log("    [건너뜀] --dry-run 이라 전송하지 않습니다")
+        return 0, False
 
     api.post_image(buf.getvalue(), "escalation_%s.png" % marker)
-    log("  [전송] 완료")
-    return 0
+    log("    [전송] 완료")
+    return 0, True
 
 
-def run_discord(dry_run=False, force=False, explicit=None):
+def sweep(ids, pipe, source_name, dry_run, force, quiet=False):
+    """모든 채널을 한 바퀴 돈다. (최악 종료코드, 전송한 채널 집합)"""
+    worst, posted = 0, set()
+    for cid in ids:
+        try:
+            rc, did = run_one_channel(cid, pipe, source_name, dry_run, force, quiet)
+        except Exception as exc:
+            # 한 채널이 막혀도 나머지는 계속 처리한다
+            log("  [오류] %s: %s" % (type(exc).__name__, exc))
+            rc, did = 5, False
+        worst = max(worst, rc)
+        if did:
+            posted.add(cid)
+    return worst, posted
+
+
+def run_discord(dry_run=False, force=False, explicit=None,
+                watch=0, interval=300):
     ids = channel_ids(explicit)
     if not ids:
         log("[오류] DISCORD_CHANNEL_ID 가 없습니다")
         return 1
 
     source_name = os.environ.get("SOURCE_BOT_NAME") or DEFAULT_SOURCE
-    log("[감시] '%s' / 채널 %d곳" % (source_name, len(ids)))
-
     pipe = pl.Pipeline()
-    worst = 0
-    for cid in ids:
-        try:
-            rc = run_one_channel(cid, pipe, source_name, dry_run, force)
-        except Exception as exc:
-            # 한 채널이 막혀도 나머지는 계속 처리한다
-            log("  [오류] %s: %s" % (type(exc).__name__, exc))
-            rc = 5
-        worst = max(worst, rc)
+    log("[감시] '%s' / 채널 %d곳%s"
+        % (source_name, len(ids),
+           (" / 최대 %d분 지켜봄" % watch) if watch else ""))
+
+    worst, done = sweep(ids, pipe, source_name, dry_run, force)
+
+    if watch and len(done) < len(ids):
+        deadline = time.monotonic() + watch * 60
+        rounds = 0
+        while time.monotonic() < deadline and len(done) < len(ids):
+            time.sleep(min(interval, max(1, deadline - time.monotonic())))
+            rounds += 1
+            left = [c for c in ids if c not in done]
+            rc, got = sweep(left, pipe, source_name, dry_run, force, quiet=True)
+            worst = max(worst, rc)
+            done |= got
+            if rounds % 12 == 0 and not got:
+                log("  [%s UTC] 아직 새 글 없음 — %d곳 대기 중" % (stamp(), len(left)))
+        if len(done) < len(ids):
+            log("[종료] 지켜보기 시간이 끝났습니다 (%d/%d곳 전송)"
+                % (len(done), len(ids)))
 
     for eng, ko in pipe.tr.flush_pending():
         log("[사전 추가] %s -> %s  (needs_review 에 올림)" % (eng, ko))
@@ -165,15 +199,23 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="확전 번역봇 v13")
     ap.add_argument("--dry-run", action="store_true", help="읽되 전송하지 않음")
     ap.add_argument("--file", help="디스코드 대신 파일에서 읽음")
-    ap.add_argument("--force", action="store_true", help="이미 올린 날짜여도 다시 전송")
+    ap.add_argument("--force", action="store_true", help="같은 내용이어도 다시 전송")
     ap.add_argument("--channel", help="채널 ID. 쉼표로 여러 개")
+    ap.add_argument("--watch", type=int, default=0, metavar="분",
+                    help="새 글이 올 때까지 지켜볼 시간 (0이면 한 번만)")
+    ap.add_argument("--interval", type=int, default=300, metavar="초",
+                    help="지켜볼 때 확인 간격")
     args = ap.parse_args(argv)
 
     try:
         if args.file:
             return run_offline(args.file)
         return run_discord(dry_run=args.dry_run, force=args.force,
-                           explicit=args.channel)
+                           explicit=args.channel, watch=args.watch,
+                           interval=args.interval)
+    except KeyboardInterrupt:
+        log("[중단] 사용자 중지")
+        return 130
     except Exception as exc:
         log("[오류] %s: %s" % (type(exc).__name__, exc))
         return 1
