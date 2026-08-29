@@ -144,8 +144,8 @@ def run_one_channel(cid, pipe, source_name, dry_run, force, quiet=False):
 
 
 def sweep(ids, pipe, source_name, dry_run, force, quiet=False):
-    """모든 채널을 한 바퀴 돈다. (최악 종료코드, 전송한 채널 집합)"""
-    worst, posted = 0, set()
+    """모든 채널을 한 바퀴 돈다. (채널별 종료코드, 전송한 채널 집합)"""
+    rcs, posted = {}, set()
     for cid in ids:
         try:
             rc, did = run_one_channel(cid, pipe, source_name, dry_run, force, quiet)
@@ -153,10 +153,10 @@ def sweep(ids, pipe, source_name, dry_run, force, quiet=False):
             # 한 채널이 막혀도 나머지는 계속 처리한다
             log("  [오류] %s: %s" % (type(exc).__name__, exc))
             rc, did = 5, False
-        worst = max(worst, rc)
+        rcs[cid] = rc
         if did:
             posted.add(cid)
-    return worst, posted
+    return rcs, posted
 
 
 def run_discord(dry_run=False, force=False, explicit=None,
@@ -172,7 +172,10 @@ def run_discord(dry_run=False, force=False, explicit=None,
         % (source_name, len(ids),
            (" / 최대 %d분 지켜봄" % watch) if watch else ""))
 
-    worst, done = sweep(ids, pipe, source_name, dry_run, force)
+    # 채널별로 '마지막에 본 상태'만 남긴다. 다섯 시간을 지켜보다 보면 통신이
+    # 한 번쯤 끊기는데, 그 한 번을 끝까지 들고 가면 제대로 게시하고도 실행이
+    # 실패로 남는다. 그러면 진짜 고장과 구분할 수가 없다.
+    state, done = sweep(ids, pipe, source_name, dry_run, force)
 
     if watch and len(done) < len(ids):
         deadline = time.monotonic() + watch * 60
@@ -181,14 +184,23 @@ def run_discord(dry_run=False, force=False, explicit=None,
             time.sleep(min(interval, max(1, deadline - time.monotonic())))
             rounds += 1
             left = [c for c in ids if c not in done]
-            rc, got = sweep(left, pipe, source_name, dry_run, force, quiet=True)
-            worst = max(worst, rc)
+            rcs, got = sweep(left, pipe, source_name, dry_run, force, quiet=True)
+            state.update(rcs)
             done |= got
             if rounds % 12 == 0 and not got:
                 log("  [%s UTC] 아직 새 글 없음 — %d곳 대기 중" % (stamp(), len(left)))
         if len(done) < len(ids):
             log("[종료] 지켜보기 시간이 끝났습니다 (%d/%d곳 전송)"
                 % (len(done), len(ids)))
+
+    worst = max(state.values()) if state else 0
+    if worst:
+        # 조용히 실패하지 않는다. 지켜보는 동안은 로그를 줄여두므로
+        # 끝에 한 번은 어느 채널이 왜 걸렸는지 남긴다.
+        log("[결과] 마지막 확인에서 정상이 아닌 채널 %d곳: %s"
+            % (sum(1 for rc in state.values() if rc),
+               ", ".join("...%s(rc=%d)" % (c[-4:], rc)
+                         for c, rc in state.items() if rc)))
 
     for eng, ko in pipe.tr.flush_pending():
         log("[사전 추가] %s -> %s  (needs_review 에 올림)" % (eng, ko))

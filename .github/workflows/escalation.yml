@@ -19,6 +19,14 @@ on:
         type: boolean
         default: false
 
+# 3시간마다 깨우는데 한 번 깨면 최대 5시간을 지켜본다. 그대로 두면 늘 둘이
+# 겹쳐 돌고, 원문이 올라온 순간 두 실행이 거의 동시에 확인해 같은 그림이
+# 두 번 나갈 수 있다. 새로 깨어난 쪽에 자리를 넘겨 언제나 하나만 지켜보게 한다.
+# 손으로 돌리는 것도 같은 자리를 쓰므로, 지켜보는 중에도 바로 끼어들 수 있다.
+concurrency:
+  group: escalation-watch
+  cancel-in-progress: true
+
 jobs:
   post:
     runs-on: ubuntu-latest
