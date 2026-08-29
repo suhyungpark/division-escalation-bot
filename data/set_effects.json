@@ -611,7 +611,7 @@
     },
     "Gila Guard": {
       "ko": "길라 가드",
-      "source": "ingame",
+      "source": "patch-pve",
       "tiers": [
         {
           "n": 1,
@@ -619,7 +619,7 @@
         },
         {
           "n": 2,
-          "text": "+60.0% 생명력"
+          "text": "+20.0% 상태이상 저항"
         },
         {
           "n": 3,
@@ -1029,7 +1029,7 @@
     },
     "Ceska Vyroba S.R.O.": {
       "ko": "체코 중공업 유한회사",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "무기 대미지",
       "tiers": [
         {
@@ -1038,11 +1038,11 @@
         },
         {
           "n": 2,
-          "text": "+20.0% 상태이상 저항"
+          "text": "+24.0% 산탄총 대미지"
         },
         {
           "n": 3,
-          "text": "+90.0% 생명력"
+          "text": "+30.0% 상태이상 저항"
         }
       ]
     },
@@ -1086,7 +1086,7 @@
     },
     "Palisade Steelworks": {
       "ko": "팰리세이드 제강소",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
@@ -1095,7 +1095,7 @@
         },
         {
           "n": 2,
-          "text": "+60.0% 생명력"
+          "text": "+20.0% 정예 대상 방호도"
         },
         {
           "n": 3,
@@ -1105,7 +1105,7 @@
     },
     "Uzina Getica": {
       "ko": "우지나 게티카",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
@@ -1124,7 +1124,7 @@
     },
     "Yaahl Gear": {
       "ko": "얄 기어",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
@@ -1133,7 +1133,7 @@
         },
         {
           "n": 2,
-          "text": "+10.0% 무기 대미지"
+          "text": "+12.0% 무기 대미지"
         },
         {
           "n": 3,
@@ -1143,7 +1143,7 @@
     },
     "Belstone Armory": {
       "ko": "벨스톤 무기고",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
@@ -1152,11 +1152,11 @@
         },
         {
           "n": 2,
-          "text": "+10.0% 적 처치 시 방어도 회복"
+          "text": "+100.0% 위협 수준 증가"
         },
         {
           "n": 3,
-          "text": "+45.0% 받는 치유 효과"
+          "text": "+30.0% 정예 대상 방호도"
         }
       ]
     },
@@ -1200,16 +1200,16 @@
     },
     "5.11 Tactical": {
       "ko": "5.11 택티컬",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "방어도",
       "tiers": [
         {
           "n": 1,
-          "text": "+30.0% 생명력"
+          "text": "+10.0% 정예 대상 방호도"
         },
         {
           "n": 2,
-          "text": "+30.0% 받는 치유 효과"
+          "text": "+100.0% 위협 수준 증가"
         },
         {
           "n": 3,
@@ -1238,7 +1238,7 @@
     },
     "Electrique": {
       "ko": "전격",
-      "source": "namu",
+      "source": "patch-pve",
       "core_attribute": "스킬 등급",
       "tiers": [
         {
@@ -1247,11 +1247,11 @@
         },
         {
           "n": 2,
-          "text": "+20.0% 충격 저항"
+          "text": "+20.0% 상태이상 저항"
         },
         {
           "n": 3,
-          "text": "+30.0% 기관단총 대미지"
+          "text": "+8.0% 스킬 효율"
         }
       ]
     },

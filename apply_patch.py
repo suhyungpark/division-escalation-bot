@@ -50,9 +50,11 @@ GLOSSARY = {
     "Rifle Damage": "소총 대미지",
     "Shotgun Damage": "산탄총 대미지",
     "Pistol Damage": "권총 대미지",
-    # 아직 인게임 표기를 확인하지 못한 것 — None 이면 검토 대기로 표시한다
-    "Hazard Protection": None,
-    "Protection from Elites": None,
+    # 아래 둘은 나무위키 브랜드 표에서 옮겼다. 인게임 캡처는 아직 없다.
+    # 대조군으로 길라 가드(인게임 확인)를 함께 뽑아 세 줄이 우리 값과 맞는 것을
+    # 확인한 뒤 반영했다. 게임 화면과 다르면 여기만 고치고 다시 돌리면 된다.
+    "Hazard Protection": "상태이상 저항",
+    "Protection from Elites": "정예 대상 방호도",
 }
 
 # (수치, 스탯) 세 쌍. 패치 노트 PvE 열 그대로.
@@ -167,9 +169,9 @@ def main():
             cur["tiers"].append(talent)
         cur["source"] = "patch-pve"
 
-    fx["_note"].append(
-        "2026-08-27 Red Horizon 패치 반영. 세트 보너스는 PvE 수치 기준."
-    )
+    note = "2026-08-27 Red Horizon 패치 반영. 세트 보너스는 PvE 수치 기준."
+    if note not in fx["_note"]:
+        fx["_note"].append(note)
     path.write_text(json.dumps(fx, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print("바뀐 항목 %d개" % len(changed))
