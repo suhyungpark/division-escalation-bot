@@ -18,7 +18,7 @@
     "Knee Pad": "무릎 보호대",
     "5.11 Tactical": "5.11 택티컬",
     "Belstone Armory": "벨스톤 무기고",
-    "Brazos de Arcabuz": "브라조스 데 아르카부스",
+    "Brazos de Arcabuz": "브라조스 데 아쿼버스",
     "Uzina Getica": "우지나 게티카",
     "Yaahl Gear": "얄 기어",
     "Weapon Cache": "프로토타입 무기 상자",
@@ -51,10 +51,6 @@
     "Chest Pieces": "Gear"
   },
   "needs_review": [
-    "Belstone Armory",
-    "Brazos de Arcabuz",
-    "Uzina Getica",
-    "Yaahl Gear",
     "5.11 Tactical"
   ],
   "allow_no_icon": [
