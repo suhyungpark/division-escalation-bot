@@ -16,7 +16,7 @@
     "Mask": "마스크",
     "Glove": "장갑",
     "Knee Pad": "무릎 보호대",
-    "5.11 Tactical": "5.11 택티컬",
+    "5.11 Tactical": "5.11 Tactical",
     "Belstone Armory": "벨스톤 무기고",
     "Brazos de Arcabuz": "브라조스 데 아쿼버스",
     "Uzina Getica": "우지나 게티카",
@@ -50,9 +50,7 @@
     "Body Armor": "Gear",
     "Chest Pieces": "Gear"
   },
-  "needs_review": [
-    "5.11 Tactical"
-  ],
+  "needs_review": [],
   "allow_no_icon": [
     "Prototype Gear Cache",
     "Prototype Weapon Cache",
