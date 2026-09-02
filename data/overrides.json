@@ -24,7 +24,8 @@
     "Weapon Cache": "프로토타입 무기 상자",
     "Gear Cache": "프로토타입 장비 상자",
     "Body Armor": "방탄복",
-    "Chest Pieces": "방탄복"
+    "Chest Pieces": "방탄복",
+    "Ember Engine": "엠버 엔진"
   },
   "item_categories": {
     "Golan Gear Ltd": "Brand Set",
@@ -48,7 +49,8 @@
     "Weapon Cache": "Cache",
     "Gear Cache": "Cache",
     "Body Armor": "Gear",
-    "Chest Pieces": "Gear"
+    "Chest Pieces": "Gear",
+    "Ember Engine": "Gear Set"
   },
   "needs_review": [],
   "allow_no_icon": [
