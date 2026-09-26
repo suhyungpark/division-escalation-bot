@@ -110,6 +110,7 @@ HEAD_PAD_Y   = 20
 # ---------- UI 문구 ----------
 LABELS = {
     "title":        "일일 확전 지정 전리품",
+    "post_title":   "{title} · {date}{wd}",     # 게시판 글 제목. {date}는 빼지 말 것
     "updated":      "업데이트",
     "sec_missions": "임무",
     "sec_vendor":   "확전 보급 판매상",

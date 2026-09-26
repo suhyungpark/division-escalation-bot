@@ -11,6 +11,11 @@
 환경변수
   DISCORD_TOKEN        봇 토큰                        (필수)
   DISCORD_CHANNEL_ID   채널 ID. 쉼표로 여러 개 가능      (필수)
+                       원문을 읽고, 그 채널에 결과를 올린다
+  DISCORD_FORWARD_CHANNEL_ID
+                       결과 그림을 전달만 할 채널      (선택)
+                       원문 봇이 없는 곳이어도 된다. 게시판(포럼)도 된다
+  DISCORD_FORUM_TAG    게시판 글에 붙일 태그 이름       (선택, 태그 필수 게시판만)
   SOURCE_BOT_NAME      원문 봇 이름                    (기본: Daily Escalation Target Loot)
   DEEPL_API_KEY        사전에 없을 때만 쓰는 키          (선택)
 
@@ -44,9 +49,25 @@ def stamp():
     return _dt.datetime.now(_dt.timezone.utc).strftime("%H:%M")
 
 
+def split_ids(raw):
+    return [c for c in re.split(r"[,\s]+", (raw or "").strip()) if c]
+
+
 def channel_ids(explicit=None):
-    raw = explicit or os.environ.get("DISCORD_CHANNEL_ID") or ""
-    return [c for c in re.split(r"[,\s]+", raw.strip()) if c]
+    return split_ids(explicit or os.environ.get("DISCORD_CHANNEL_ID"))
+
+
+def forward_ids():
+    return split_ids(os.environ.get("DISCORD_FORWARD_CHANNEL_ID"))
+
+
+def post_title(date):
+    """게시판 글 제목. 중복 확인이 제목의 날짜를 보므로 날짜는 꼭 들어가야 한다."""
+    try:
+        wd = " (%s)" % "월화수목금토일"[_dt.date.fromisoformat(date).weekday()]
+    except ValueError:
+        wd = ""
+    return cfg.LABELS["post_title"].format(title=cfg.LABELS["title"], date=date, wd=wd)
 
 
 def content_key(parsed):
@@ -96,33 +117,47 @@ def run_offline(path):
     return 0
 
 
-def run_one_channel(cid, pipe, source_name, dry_run, force, quiet=False):
-    """채널 하나 처리. (종료코드, 전송했는지) 를 돌려준다."""
+def run_one_target(reads, post, pipe, source_name, dry_run, force, quiet=False):
+    """보낼 곳 하나 처리. reads 중 원문이 있는 채널에서 읽어 post 에 올린다.
+    보통은 읽는 곳과 보내는 곳이 같고, 전달 채널만 다르다.
+    (종료코드, 전송했는지) 를 돌려준다."""
     import discord_client as dc
 
-    api = dc.Discord(channel_id=cid)
-    name = api._get("/channels/%s" % cid).get("name")
+    api = dc.Discord(channel_id=post)
+    label = ("#%s" if tuple(reads) == (post,) else "→#%s") % api.name()
 
-    msg = api.find_source(source_name)
+    # 전달 채널은 읽을 곳이 여럿이라, 한 곳이 막혀도 다음 곳에서 읽으면 된다
+    msg, reader, errors = None, None, []
+    for rid in reads:
+        reader = api if rid == post else dc.Discord(channel_id=rid)
+        try:
+            msg = reader.find_source(source_name)
+        except dc.DiscordError as exc:
+            errors.append(exc)
+            continue
+        if msg:
+            break
     if not msg:
+        if errors and len(errors) == len(reads):
+            raise errors[-1]
         if not quiet:
-            log("  [#%s] 원문 봇의 메시지를 찾지 못했습니다" % name)
+            log("  [%s] 원문 봇의 메시지를 찾지 못했습니다" % label)
         return 3, False
 
-    parsed = msg_parser.parse(api.message_text(msg))
+    parsed = msg_parser.parse(reader.message_text(msg))
     if not parsed:
         if not quiet:
-            log("  [#%s] 확전 형식이 아닙니다" % name)
+            log("  [%s] 확전 형식이 아닙니다" % label)
         return 4, False
 
     marker = "%s_%s" % (parsed["date"], content_key(parsed))
     if not force and api.already_posted(marker):
         if not quiet:
-            log("  [#%s] %s — 이미 올린 내용" % (name, marker))
+            log("  [%s] %s — 이미 올린 내용" % (label, marker))
         return 0, False
 
-    log("  [#%s] %s / 임무 %d개 / 벤더 %d개 — 새 내용"
-        % (name, marker, len(parsed["missions"]), len(parsed["vendor"])))
+    log("  [%s] %s / 임무 %d개 / 벤더 %d개 — 새 내용"
+        % (label, marker, len(parsed["missions"]), len(parsed["vendor"])))
 
     posted_at = msg.get("timestamp")
     when = (_dt.datetime.fromisoformat(posted_at) if posted_at
@@ -130,7 +165,7 @@ def run_one_channel(cid, pipe, source_name, dry_run, force, quiet=False):
     data, notices = pipe.build(parsed, when)
 
     img, buf = render_png(data)
-    save_local(marker, img, "_" + cid[-4:])
+    save_local(marker, img, "_" + post[-4:])
     for n in notices:
         log("    [알림] " + n)
 
@@ -138,25 +173,54 @@ def run_one_channel(cid, pipe, source_name, dry_run, force, quiet=False):
         log("    [건너뜀] --dry-run 이라 전송하지 않습니다")
         return 0, False
 
-    api.post_image(buf.getvalue(), "escalation_%s.png" % marker)
-    log("    [전송] 완료")
+    api.post_image(buf.getvalue(), "escalation_%s.png" % marker,
+                   title=post_title(parsed["date"]))
+    log("    [전송] 완료%s" % (" (게시판 새 글)" if api.is_forum() else ""))
     return 0, True
 
 
-def sweep(ids, pipe, source_name, dry_run, force, quiet=False):
-    """모든 채널을 한 바퀴 돈다. (채널별 종료코드, 전송한 채널 집합)"""
+def sweep(targets, pipe, source_name, dry_run, force, quiet=False):
+    """보낼 곳을 모두 한 바퀴 돈다. (보낼 곳별 종료코드, 전송한 곳 집합)"""
     rcs, posted = {}, set()
-    for cid in ids:
+    for reads, post in targets:
         try:
-            rc, did = run_one_channel(cid, pipe, source_name, dry_run, force, quiet)
+            rc, did = run_one_target(reads, post, pipe, source_name,
+                                     dry_run, force, quiet)
         except Exception as exc:
-            # 한 채널이 막혀도 나머지는 계속 처리한다
+            # 한 곳이 막혀도 나머지는 계속 처리한다
             log("  [오류] %s: %s" % (type(exc).__name__, exc))
             rc, did = 5, False
-        rcs[cid] = rc
+        rcs[post] = rc
         if did:
-            posted.add(cid)
+            posted.add(post)
     return rcs, posted
+
+
+def plan_targets(ids, fwd):
+    """(읽을 채널들, 보낼 채널) 목록을 만든다.
+
+    읽기 채널로 게시판이 들어오면 읽을 수가 없으니 전달 대상으로 돌린다.
+    GitHub 시크릿은 값을 다시 볼 수 없어서, 기존 목록에 게시판을 덧붙여 넣는
+    일이 생기기 쉽다. 그래도 멈추지 않고 뜻대로 돌게 한다."""
+    import discord_client as dc
+    reads = []
+    for cid in ids:
+        try:
+            forum = dc.Discord(channel_id=cid).is_forum()
+        except Exception:
+            forum = False       # 확인이 안 되면 그대로 둔다. 문제는 본 처리에서 드러난다
+        if forum:
+            log("  [안내] ...%s 은 게시판이라 원문을 읽을 수 없어 전달만 합니다" % cid[-4:])
+            fwd = fwd + [cid]
+        else:
+            reads.append(cid)
+    targets = [((c,), c) for c in reads]
+    seen = set(reads)
+    for f in fwd:
+        if f not in seen:
+            seen.add(f)
+            targets.append((tuple(reads), f))
+    return reads, targets
 
 
 def run_discord(dry_run=False, force=False, explicit=None,
@@ -166,32 +230,39 @@ def run_discord(dry_run=False, force=False, explicit=None,
         log("[오류] DISCORD_CHANNEL_ID 가 없습니다")
         return 1
 
+    reads, targets = plan_targets(ids, forward_ids())
+    if not reads:
+        log("[오류] 원문을 읽을 채널이 없습니다 (게시판만 지정됨)")
+        return 1
+
     source_name = os.environ.get("SOURCE_BOT_NAME") or DEFAULT_SOURCE
     pipe = pl.Pipeline()
-    log("[감시] '%s' / 채널 %d곳%s"
-        % (source_name, len(ids),
+    extra = len(targets) - len(reads)
+    log("[감시] '%s' / 채널 %d곳%s%s"
+        % (source_name, len(reads),
+           (" + 전달 %d곳" % extra) if extra else "",
            (" / 최대 %d분 지켜봄" % watch) if watch else ""))
 
     # 채널별로 '마지막에 본 상태'만 남긴다. 다섯 시간을 지켜보다 보면 통신이
     # 한 번쯤 끊기는데, 그 한 번을 끝까지 들고 가면 제대로 게시하고도 실행이
     # 실패로 남는다. 그러면 진짜 고장과 구분할 수가 없다.
-    state, done = sweep(ids, pipe, source_name, dry_run, force)
+    state, done = sweep(targets, pipe, source_name, dry_run, force)
 
-    if watch and len(done) < len(ids):
+    if watch and len(done) < len(targets):
         deadline = time.monotonic() + watch * 60
         rounds = 0
-        while time.monotonic() < deadline and len(done) < len(ids):
+        while time.monotonic() < deadline and len(done) < len(targets):
             time.sleep(min(interval, max(1, deadline - time.monotonic())))
             rounds += 1
-            left = [c for c in ids if c not in done]
+            left = [t for t in targets if t[1] not in done]
             rcs, got = sweep(left, pipe, source_name, dry_run, force, quiet=True)
             state.update(rcs)
             done |= got
             if rounds % 12 == 0 and not got:
                 log("  [%s UTC] 아직 새 글 없음 — %d곳 대기 중" % (stamp(), len(left)))
-        if len(done) < len(ids):
+        if len(done) < len(targets):
             log("[종료] 지켜보기 시간이 끝났습니다 (%d/%d곳 전송)"
-                % (len(done), len(ids)))
+                % (len(done), len(targets)))
 
     worst = max(state.values()) if state else 0
     if worst:

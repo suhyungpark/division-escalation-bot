@@ -54,6 +54,9 @@ jobs:
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+          # 그림을 전달만 할 곳(게시판 포함). 시크릿이든 변수든 한 곳에만 넣으면 된다.
+          DISCORD_FORWARD_CHANNEL_ID: ${{ secrets.DISCORD_FORWARD_CHANNEL_ID || vars.DISCORD_FORWARD_CHANNEL_ID }}
+          DISCORD_FORUM_TAG: ${{ vars.DISCORD_FORUM_TAG }}
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
           SOURCE_BOT_NAME: ${{ vars.SOURCE_BOT_NAME }}
         run: |
