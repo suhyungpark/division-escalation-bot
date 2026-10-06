@@ -25,7 +25,8 @@
     "Gear Cache": "프로토타입 장비 상자",
     "Body Armor": "방탄복",
     "Chest Pieces": "방탄복",
-    "Ember Engine": "엠버 엔진"
+    "Ember Engine": "엠버 엔진",
+    "Pathway Park": "패스웨이 공원"
   },
   "item_categories": {
     "Golan Gear Ltd": "Brand Set",
@@ -52,7 +53,9 @@
     "Chest Pieces": "Gear",
     "Ember Engine": "Gear Set"
   },
-  "needs_review": [],
+  "needs_review": [
+    "Pathway Park"
+  ],
   "allow_no_icon": [
     "Prototype Gear Cache",
     "Prototype Weapon Cache",
