@@ -94,6 +94,10 @@ class Translator:
         self.unknown.append(english)
         return Entry(english, english, "", None, auto=True, how="none")
 
+    def knows_mission(self, english):
+        """DeepL 을 부르지 않고 사전에 있는지만 본다."""
+        return self._find(english.strip(), self._mission_index)[0] is not None
+
     def mission(self, english):
         english = english.strip()
         key, how = self._find(english, self._mission_index)
@@ -109,6 +113,9 @@ class Translator:
     # ---------- 기계번역 ----------
     def _deepl(self, text):
         if not self.deepl_key:
+            return None
+        if re.search(r"[<>]|https?:|//|\d{6,}", text):
+            # 이름일 리 없는 조각이다. 번역해서 사전에 남기면 다음 실행까지 오염된다.
             return None
         import requests
         host = "api-free.deepl.com" if self.deepl_key.endswith(":fx") else "api.deepl.com"

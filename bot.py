@@ -150,6 +150,17 @@ def run_one_target(reads, post, pipe, source_name, dry_run, force, quiet=False):
             log("  [%s] 확전 형식이 아닙니다" % label)
         return 4, False
 
+    # 형식이 바뀌면 파서가 그럴듯한 조각을 내놓는다. 임무 이름은 닫힌 집합이라
+    # 절반도 사전에 없으면 읽기가 어긋난 것이다. 깨진 그림을 '성공'으로 올리지 않는다.
+    known = sum(1 for r in parsed["missions"] if pipe.tr.knows_mission(r["mission_en"]))
+    if known * 2 < len(parsed["missions"]):
+        if not quiet:
+            log("  [%s] 임무 %d개 중 사전에 있는 것이 %d개뿐입니다 — 원문 형식이 바뀐 것 "
+                "같아 올리지 않습니다: %s"
+                % (label, len(parsed["missions"]), known,
+                   " / ".join(r["mission_en"] for r in parsed["missions"])))
+        return 4, False
+
     marker = "%s_%s" % (parsed["date"], content_key(parsed))
     if not force and api.already_posted(marker):
         if not quiet:

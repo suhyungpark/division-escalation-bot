@@ -9,11 +9,24 @@
           Vendor Caches
           Gear: Backpacks
 
-  (신형)  **Daily Escalation Target Loot** | (이모지) **2026-08-13**
+  (8월형)  **Daily Escalation Target Loot** | (이모지) **2026-08-13**
           **Missions:**
           * **Wall Street**: Golan Gear Ltd
           **Escalation Vendor Requisition:**
           * **Weapon Cache**: Rifles
+
+  (10월형) 🎯 **Daily Escalation Target Loot · 2026-10-10**
+          **Missions:**
+          <:cleaners:1557773297385742446> **Pathway Park**
+          ↳ China Light Industries <:chinalight:155777...>
+          **Escalation Vendor Caches:**
+          • **Weapon Cache:** Assault Rifles <:ar:155777...>
+          ProtoTrack: https://prototrack.gg/
+
+10월형은 미션과 전리품이 두 줄로 나뉘고, 이름마다 디스코드 커스텀 이모지가
+붙는다. 커스텀 이모지의 원문 표기 <:이름:숫자> 에 콜론이 들어 있어서, 걷어내지
+않으면 "콜론 앞 = 미션" 규칙이 이모지 한가운데서 잘린다. 2026-10-01 무렵부터
+열흘 가까이 그렇게 잘린 조각이 그대로 그림과 사전에 들어갔다.
 
 주간 로테이션 줄은 읽지 않는다. v13 이미지에 넣지 않기로 했다.
 시각은 본문에 없어서 디스코드 메시지 타임스탬프를 쓴다.
@@ -22,21 +35,25 @@ import re
 
 DATE_RE = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
 
+VENDOR_HEAD = (r"(?:Escalation\s+Vendor\s+Requisition|Escalation\s+Requisition\s+Vendor"
+               r"|Escalation\s+Vendor\s+Caches?|Vendor\s+Caches?)")
 MISSIONS_RE = re.compile(
-    r"Missions?\s*:?\s*\n(.*?)"
-    r"(?=(?:Escalation\s+Vendor\s+Requisition|Escalation\s+Requisition\s+Vendor"
-    r"|Vendor\s+Caches?)\s*:?|\Z)",
+    r"Missions?\s*:?\s*\n(.*?)(?=" + VENDOR_HEAD + r"\s*:?|\Z)",
     re.S | re.I,
 )
-VENDOR_RE = re.compile(
-    r"(?:Escalation\s+Vendor\s+Requisition|Escalation\s+Requisition\s+Vendor"
-    r"|Vendor\s+Caches?)\s*:?\s*\n(.*)",
-    re.S | re.I,
-)
+VENDOR_RE = re.compile(VENDOR_HEAD + r"\s*:?\s*\n(.*)", re.S | re.I)
 LINE_RE = re.compile(r"^(.+?)\s*:\s*(.+?)\s*$")
 BRACKET_RE = re.compile(r"\s*\[([^\]]+)\]\s*$")
 
 BULLET_RE = re.compile(r"^[\s*\-•·◆▪→>]+")
+
+# 디스코드 커스텀 이모지. API 원문은 <:이름:숫자>, 손으로 복사하면 :이름: 이 된다.
+CUSTOM_EMOJI_RE = re.compile(r"<a?:[\w~]+:\d+>")
+SHORTCODE_RE = re.compile(r"(?<![\w/]):[A-Za-z_][\w~]*:(?![\w/])")
+# 10월형에서 미션 이름 다음 줄의 전리품 앞에 붙는 화살표
+LOOT_ARROW_RE = re.compile(r"^\s*[↳⤷└╰➥]\s*")
+# 미션·전리품 이름에 나올 리 없는 것. 걸리면 형식이 또 바뀐 것이니 버린다.
+SUSPICIOUS_RE = re.compile(r"[<>]|https?:|//|\d{6,}")
 MD_RE = re.compile(r"\*+|`+|__")
 EMOJI_RE = re.compile(
     "["
@@ -68,10 +85,31 @@ def prepare(text):
     줄 안쪽 공백만 정리한다.
     """
     s = text.replace("\r\n", "\n")
+    # 이모지 안의 콜론이 '미션: 전리품' 구분과 섞이지 않게 가장 먼저 걷어낸다
+    s = CUSTOM_EMOJI_RE.sub(" ", s)
+    s = SHORTCODE_RE.sub(" ", s)
+    # 화살표는 아래 EMOJI_RE 범위에 들어 있어 지워지기 전에 처리해야 한다
+    s = "\n".join(_join_arrows(s.split("\n")))
     s = MD_RE.sub("", s)
     s = EMOJI_RE.sub(" ", s)
     lines = [re.sub(r"[ \t]+", " ", ln).strip() for ln in s.split("\n")]
     return "\n".join(lines)
+
+
+def _join_arrows(lines):
+    """'미션' 다음 줄의 '↳ 전리품'을 '미션: 전리품' 한 줄로 합친다."""
+    out = []
+    for ln in lines:
+        m = LOOT_ARROW_RE.match(ln)
+        if m:
+            j = len(out) - 1
+            while j >= 0 and not out[j].strip():
+                j -= 1
+            if j >= 0:
+                out[j] = out[j].rstrip() + ": " + ln[m.end():].strip()
+                continue
+        out.append(ln)
+    return out
 
 
 def _rows(block):
@@ -79,6 +117,8 @@ def _rows(block):
     for raw in block.split("\n"):
         line = BULLET_RE.sub("", raw).strip()
         if not line or ":" not in line:
+            continue
+        if SUSPICIOUS_RE.search(line):
             continue
         hint = ""
         m = BRACKET_RE.search(line)
