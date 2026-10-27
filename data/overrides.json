@@ -26,7 +26,9 @@
     "Body Armor": "방탄복",
     "Chest Pieces": "방탄복",
     "Ember Engine": "엠버 엔진",
-    "Pathway Park": "패스웨이 공원"
+    "Pathway Park": "패스웨이 공원",
+    "Coney Island Ballpark": "코니 아일랜드 야구장",
+    "Coney Island Amusement Park": "코니 아일랜드 놀이공원"
   },
   "item_categories": {
     "Golan Gear Ltd": "Brand Set",
@@ -54,7 +56,9 @@
     "Ember Engine": "Gear Set"
   },
   "needs_review": [
-    "Pathway Park"
+    "Pathway Park",
+    "Coney Island Ballpark",
+    "Coney Island Amusement Park"
   ],
   "allow_no_icon": [
     "Prototype Gear Cache",
